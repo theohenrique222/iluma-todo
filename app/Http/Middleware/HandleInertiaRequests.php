@@ -48,6 +48,7 @@ class HandleInertiaRequests extends Middleware
                     ->withCount('tasks')
                     ->get()
                 : [],
+            'selectedProjectUlid' => fn () => $request->query('project'),
         ];
     }
 }

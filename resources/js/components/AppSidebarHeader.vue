@@ -33,8 +33,19 @@ withDefaults(
     },
 );
 
-const page = usePage<{ projects: Project[] }>();
+const page = usePage<{ projects: Project[]; selectedProjectUlid?: string | null }>();
 const projects = computed(() => page.props.projects ?? []);
+const selectedProjectUlid = computed(() => page.props.selectedProjectUlid ?? null);
+
+const defaultProjectId = computed(() => {
+    if (!selectedProjectUlid.value || !projects.value.length) {
+        return undefined;
+    }
+
+    const project = projects.value.find((p) => p.ulid === selectedProjectUlid.value);
+
+    return project ? String(project.id) : undefined;
+});
 
 const dialogOpen = ref(false);
 
@@ -115,6 +126,7 @@ useEventListener('keydown', (event: KeyboardEvent) => {
             </DialogHeader>
             <TaskForm
                 :projects="projects"
+                :default-project-id="defaultProjectId"
                 @submit="handleTaskSubmit"
                 @cancel="handleTaskCancel"
             />

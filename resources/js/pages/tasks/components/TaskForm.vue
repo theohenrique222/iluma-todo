@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form, router, useForm } from '@inertiajs/vue3';
 import { Plus } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import InputError from '@/components/InputError.vue';
 import ProjectColorDot from '@/components/projects/ProjectColorDot.vue';
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,7 @@ import type { Project } from '@/types';
 const props = defineProps<{
     processing?: boolean;
     projects?: Project[];
+    defaultProjectId?: string;
 }>();
 
 const emits = defineEmits<{
@@ -46,7 +47,14 @@ const emits = defineEmits<{
 }>();
 
 const projectDialogOpen = ref(false);
-const selectedProjectId = ref<string>('');
+const selectedProjectId = ref<string>(props.defaultProjectId ?? '');
+
+watch(
+    () => props.defaultProjectId,
+    (newId) => {
+        selectedProjectId.value = newId ?? '';
+    },
+);
 
 const projectForm = useForm({
     name: '',
@@ -118,6 +126,19 @@ function createProject(): void {
                     required
                 />
                 <InputError :message="errors.title" />
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-sm leading-none font-medium text-foreground">
+                    Descrição
+                </label>
+                <textarea
+                    name="description"
+                    placeholder="Adicione detalhes sobre a tarefa (opcional)"
+                    rows="3"
+                    class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                ></textarea>
+                <InputError :message="errors.description" />
             </div>
 
             <div class="space-y-2">
