@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form, router, useForm } from '@inertiajs/vue3';
-import { Plus } from 'lucide-vue-next';
+import { Folder, Plus } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import InputError from '@/components/InputError.vue';
 import ProjectColorDot from '@/components/projects/ProjectColorDot.vue';
@@ -62,9 +62,9 @@ const selectedProject = computed(
         null,
 );
 
-const projectSelectClass = computed(() => {
+const projectSelectWrapperClass = computed(() => {
     const base =
-        'flex h-10 w-full cursor-pointer rounded-full border px-3 py-2 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50';
+        'relative flex h-10 w-full items-center rounded-full border shadow-sm transition-colors';
 
     if (selectedProject.value) {
         const styles = getProjectColorStyles(selectedProject.value.color);
@@ -80,7 +80,25 @@ const projectSelectClass = computed(() => {
         ];
     }
 
-    return [base, 'border-input bg-background focus-visible:ring-ring'];
+    return [base, 'border-input bg-background'];
+});
+
+const projectSelectClass = computed(() => {
+    const base =
+        'h-full w-full cursor-pointer appearance-none rounded-full border-0 bg-transparent py-2 pl-9 pr-8 text-sm shadow-none focus:outline-none focus:ring-0';
+
+    if (selectedProject.value) {
+        const styles = getProjectColorStyles(selectedProject.value.color);
+
+        return [
+            base,
+            styles.trigger.includes('text-')
+                ? styles.trigger.match(/text-\S+/)?.[0]
+                : 'text-foreground',
+        ];
+    }
+
+    return [base, 'text-foreground'];
 });
 
 const projectForm = useForm({
@@ -188,20 +206,33 @@ function createProject(): void {
                         Criar projeto
                     </Button>
                 </div>
-                <select
-                    v-model="selectedProjectId"
-                    name="project_id"
-                    :class="projectSelectClass"
-                >
-                    <option value="">Sem projeto</option>
-                    <option
-                        v-for="project in props.projects ?? []"
-                        :key="project.id"
-                        :value="String(project.id)"
+                <div :class="projectSelectWrapperClass">
+                    <Folder
+                        v-if="!selectedProject"
+                        class="absolute left-3 size-4 shrink-0 text-muted-foreground"
+                    />
+                    <ProjectColorDot
+                        v-else
+                        :dot-class="
+                            getProjectColorStyles(selectedProject.color).dot
+                        "
+                        class="absolute left-3"
+                    />
+                    <select
+                        v-model="selectedProjectId"
+                        name="project_id"
+                        :class="projectSelectClass"
                     >
-                        {{ project.name }}
-                    </option>
-                </select>
+                        <option value="">Sem projeto</option>
+                        <option
+                            v-for="project in props.projects ?? []"
+                            :key="project.id"
+                            :value="String(project.id)"
+                        >
+                            {{ project.name }}
+                        </option>
+                    </select>
+                </div>
                 <InputError :message="errors.project_id" />
             </div>
 
