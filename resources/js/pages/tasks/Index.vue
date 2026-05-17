@@ -61,6 +61,7 @@ interface PaginatedTasks {
 
 interface SharedProps {
     projects: Project[];
+    [key: string]: unknown;
 }
 
 const props = defineProps<{
@@ -253,10 +254,24 @@ function startTask(task: Task, event: Event) {
 }
 
 function formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: 'short',
-    });
+    const months: Record<number, string> = {
+        1: 'jan',
+        2: 'fev',
+        3: 'mar',
+        4: 'abr',
+        5: 'mai',
+        6: 'jun',
+        7: 'jul',
+        8: 'ago',
+        9: 'set',
+        10: 'out',
+        11: 'nov',
+        12: 'dez',
+    };
+
+    const [, month, day] = date.split('-').map(Number);
+
+    return `${day} de ${months[month]}`;
 }
 
 function getPriorityColor(priority: string): {
