@@ -50,6 +50,7 @@ const emit = defineEmits<{
 }>();
 
 const dialogOpen = ref(false);
+const selectOpen = ref(false);
 
 const selectValue = computed(() => props.modelValue || 'none');
 
@@ -104,7 +105,7 @@ function createProject() {
 
 <template>
     <div>
-        <Select :model-value="selectValue" @update:model-value="handleSelect">
+        <Select :model-value="selectValue" :open="selectOpen" @update:open="selectOpen = $event" @update:model-value="handleSelect">
             <SelectTrigger :class="triggerClass">
                 <div class="flex items-center gap-2">
                     <ProjectColorDot
@@ -146,7 +147,7 @@ function createProject() {
                     <button
                         type="button"
                         class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/40"
-                        @click.prevent.stop="dialogOpen = true"
+                        @click.prevent.stop="selectOpen = false; dialogOpen = true"
                     >
                         <Plus class="size-4" />
                         Criar novo projeto

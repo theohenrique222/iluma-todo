@@ -44,6 +44,7 @@ const emit = defineEmits<{
 const dialogProjectOpen = ref(false);
 const editDialogOpen = ref(false);
 const editingProject = ref<Project | null>(null);
+const projectSelectOpen = ref(false);
 
 const projectForm = useForm({
     name: '',
@@ -111,6 +112,8 @@ function updateProject() {
     <div class="flex items-center self-start gap-x-4">
         <Select
             :model-value="modelValue ?? 'all'"
+            :open="projectSelectOpen"
+            @update:open="projectSelectOpen = $event"
             @update:model-value="handleSelectProject"
         >
             <SelectTrigger
@@ -231,7 +234,7 @@ function updateProject() {
                     <button
                         type="button"
                         class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/40"
-                        @click.prevent.stop="dialogProjectOpen = true"
+                        @click.prevent.stop="projectSelectOpen = false; dialogProjectOpen = true"
                     >
                         <Plus class="size-4" />
                         Criar novo projeto
