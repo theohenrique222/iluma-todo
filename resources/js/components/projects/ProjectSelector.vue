@@ -30,13 +30,14 @@ import type { Project } from '@/types';
 
 const props = withDefaults(
     defineProps<{
-        modelValue: string;
+        modelValue?: string;
         projects: Project[];
         placeholder?: string;
         showCreateButton?: boolean;
         triggerClass?: string;
     }>(),
     {
+        modelValue: '',
         placeholder: 'Selecionar projeto',
         showCreateButton: true,
         triggerClass: '',
@@ -49,6 +50,8 @@ const emit = defineEmits<{
 }>();
 
 const dialogOpen = ref(false);
+
+const selectValue = computed(() => props.modelValue || 'none');
 
 const selectedProject = computed(
     () => props.projects.find((p) => String(p.id) === props.modelValue) ?? null,
@@ -101,7 +104,7 @@ function createProject() {
 
 <template>
     <div>
-        <Select :model-value="modelValue || 'none'" @update:model-value="handleSelect">
+        <Select :model-value="selectValue" @update:model-value="handleSelect">
             <SelectTrigger :class="triggerClass">
                 <div class="flex items-center gap-2">
                     <ProjectColorDot
