@@ -361,7 +361,7 @@ function updateProject() {
         <button
             v-if="selectedProject"
             type="button"
-            class="inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full border bg-white px-3 py-2 text-sm font-medium shadow-sm transition-colors outline-none hover:bg-muted"
+            class="inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full border bg-background px-3 py-2 text-sm font-medium text-foreground shadow-sm transition-colors outline-none hover:bg-muted"
             @click.stop="openEditDialog(selectedProject, $event)"
         >
             <Pencil class="size-4" />
