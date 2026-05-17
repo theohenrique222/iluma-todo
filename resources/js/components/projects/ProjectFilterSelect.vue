@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
-import { Folder, Plus } from 'lucide-vue-next';
+import { Folder, Plus, Pencil } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import ProjectColorDot from '@/components/projects/ProjectColorDot.vue';
 import { Button } from '@/components/ui/button';
@@ -42,10 +42,16 @@ const emit = defineEmits<{
 }>();
 
 const dialogProjectOpen = ref(false);
+const editDialogOpen = ref(false);
+const editingProject = ref<Project | null>(null);
 
 const projectForm = useForm({
     name: '',
     color: DEFAULT_PROJECT_COLOR as ProjectColorKey,
+});
+
+const editForm = useForm({
+    name: '',
 });
 
 const selectedProject = computed(
@@ -78,16 +84,37 @@ function createProject() {
         },
     });
 }
+
+function openEditDialog(project: Project, event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    editingProject.value = project;
+    editForm.name = project.name;
+    editDialogOpen.value = true;
+}
+
+function updateProject() {
+    if (!editingProject.value) return;
+
+    editForm.put(`/projects/${editingProject.value.ulid}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            editDialogOpen.value = false;
+            editingProject.value = null;
+            editForm.reset();
+        },
+    });
+}
 </script>
 
 <template>
-    <div class="relative flex items-center self-start">
+    <div class="flex items-center self-start gap-x-4">
         <Select
             :model-value="modelValue ?? 'all'"
             @update:model-value="handleSelectProject"
         >
             <SelectTrigger
-                class="inline-flex h-10 w-auto max-w-[280px] rounded-full border px-4 text-sm font-medium shadow-sm transition-colors outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50"
+                class="inline-flex h-9 w-auto max-w-[280px] cursor-pointer rounded-full border bg-transparent px-3 py-2 text-sm font-medium shadow-sm transition-colors outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50"
                 :class="projectSelectTriggerClass"
             >
                 <div class="flex max-w-full items-center gap-2 overflow-hidden">
@@ -288,5 +315,54 @@ function createProject() {
                 </form>
             </DialogContent>
         </Dialog>
+
+        <Dialog v-model:open="editDialogOpen">
+            <DialogContent class="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Editar Projeto</DialogTitle>
+                    <DialogDescription>
+                        Altere o nome do projeto.
+                    </DialogDescription>
+                </DialogHeader>
+                <form class="space-y-4" @submit.prevent="updateProject">
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium"
+                            >Nome do Projeto</label
+                        >
+                        <Input
+                            v-model="editForm.name"
+                            type="text"
+                            placeholder="Ex: Marketing Digital"
+                            required
+                        />
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            @click="editDialogOpen = false"
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            type="submit"
+                            :disabled="editForm.processing"
+                        >
+                            Salvar
+                        </Button>
+                    </div>
+                </form>
+            </DialogContent>
+        </Dialog>
+
+        <button
+            v-if="selectedProject"
+            type="button"
+            class="inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full border bg-white px-3 py-2 text-sm font-medium shadow-sm transition-colors outline-none hover:bg-muted"
+            @click.stop="openEditDialog(selectedProject, $event)"
+        >
+            <Pencil class="size-4" />
+            Editar projeto
+        </button>
     </div>
 </template>
