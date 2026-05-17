@@ -17,7 +17,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->only(['index', 'store', 'update', 'destroy']);
 
     Route::resource('projects', ProjectController::class)
-        ->only(['store']);
+        ->only(['store', 'update']);
 
     Route::patch('tasks/{task}/start', [TaskController::class, 'start'])
         ->name('tasks.start');
@@ -33,6 +33,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('tasks/{task}/restore', [TaskController::class, 'restore'])
         ->name('tasks.restore');
+
+    Route::delete('tasks/{task}/force', [TaskController::class, 'forceDestroy'])
+        ->name('tasks.forceDestroy');
 });
 
 require __DIR__.'/settings.php';

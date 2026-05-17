@@ -136,6 +136,24 @@ class TaskController extends Controller
         return back();
     }
 
+    public function forceDestroy(int $task): RedirectResponse
+    {
+        $task = Task::withTrashed()->findOrFail($task);
+
+        if ($task->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $task->forceDelete();
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => 'Tarefa excluída permanentemente!',
+        ]);
+
+        return back();
+    }
+
     public function updateTitle(Request $request, Task $task): RedirectResponse
     {
         if ($task->user_id !== auth()->id()) {

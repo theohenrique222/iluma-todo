@@ -27,6 +27,7 @@ import {
 interface Task {
     id: number;
     title: string;
+    description: string | null;
     due_date: string | null;
     completed_at: string | null;
     created_at: string;
@@ -394,6 +395,17 @@ function handleKeydown(event: KeyboardEvent, saveFn: () => void) {
                                         />
                                         {{ priorityConfig.label }}
                                     </Badge>
+                                </div>
+                                <div>
+                                    <p
+                                        class="text-sm text-muted-foreground"
+                                    >
+                                        {{
+                                            task.description
+                                                ? task.description
+                                                : 'Nenhuma descrição adicionada'
+                                        }}
+                                    </p>
                                 </div>
                             </div>
                         </div>

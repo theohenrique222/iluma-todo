@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['title', 'due_date', 'completed_at', 'priority', 'status', 'started_at', 'project_id'])]
+#[Fillable(['title', 'description', 'due_date', 'completed_at', 'priority', 'status', 'started_at', 'project_id'])]
 class Task extends Model
 {
     /** @use HasFactory<TaskFactory> */

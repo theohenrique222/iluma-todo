@@ -22,6 +22,7 @@ import type { Project } from '@/types';
 interface Task {
     id: number;
     title: string;
+    description: string | null;
     due_date: string | null;
     completed_at: string | null;
     created_at: string;
@@ -322,6 +323,23 @@ function restoreTask(task: Task, event: Event) {
         },
     );
 }
+
+function forceDeleteTask(task: Task, event: Event) {
+    event.stopPropagation();
+    fadingTaskIds.value.add(task.id);
+
+    setTimeout(() => {
+        localTasks.value = localTasks.value.filter((t) => t.id !== task.id);
+        fadingTaskIds.value.delete(task.id);
+    }, 1000);
+
+    router.delete(
+        `/tasks/${task.id}/force`,
+        {
+            preserveScroll: true,
+        },
+    );
+}
 </script>
 
 <template>
@@ -500,6 +518,13 @@ function restoreTask(task: Task, event: Event) {
                                     {{ task.title }}
                                 </span>
 
+                                <p
+                                    v-if="task.description"
+                                    class="line-clamp-2 text-xs text-muted-foreground"
+                                >
+                                    {{ task.description }}
+                                </p>
+
                                 <div class="flex items-center gap-2">
                                     <span
                                         v-if="task.project"
@@ -611,6 +636,13 @@ function restoreTask(task: Task, event: Event) {
                                     {{ task.title }}
                                 </span>
 
+                                <p
+                                    v-if="task.description"
+                                    class="line-clamp-2 text-xs text-muted-foreground"
+                                >
+                                    {{ task.description }}
+                                </p>
+
                                 <div class="flex items-center gap-2">
                                     <span
                                         v-if="task.project"
@@ -716,6 +748,13 @@ function restoreTask(task: Task, event: Event) {
                             {{ task.title }}
                         </span>
 
+                        <p
+                            v-if="task.description"
+                            class="line-clamp-2 text-xs text-muted-foreground"
+                        >
+                            {{ task.description }}
+                        </p>
+
                         <div class="flex items-center gap-2">
                             <span
                                 v-if="task.project"
@@ -756,6 +795,14 @@ function restoreTask(task: Task, event: Event) {
                             @click.stop="restoreTask(task, $event)"
                         >
                             <RotateCcw class="size-4" />
+                        </button>
+
+                        <button
+                            type="button"
+                            class="hidden rounded-md p-1.5 text-muted-foreground transition-all duration-200 group-hover:inline-flex hover:bg-destructive/10 hover:text-destructive"
+                            @click.stop="forceDeleteTask(task, $event)"
+                        >
+                            <Trash2 class="size-4" />
                         </button>
                     </div>
                     <Link
