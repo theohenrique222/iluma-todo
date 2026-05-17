@@ -397,14 +397,16 @@ function handleKeydown(event: KeyboardEvent, saveFn: () => void) {
                                     </Badge>
                                 </div>
                                 <div>
+                                    <div
+                                        v-if="task.description"
+                                        class="prose prose-sm dark:prose-invert max-w-none text-sm text-muted-foreground"
+                                        v-html="task.description"
+                                    ></div>
                                     <p
+                                        v-else
                                         class="text-sm text-muted-foreground"
                                     >
-                                        {{
-                                            task.description
-                                                ? task.description
-                                                : 'Nenhuma descrição adicionada'
-                                        }}
+                                        Nenhuma descrição adicionada
                                     </p>
                                 </div>
                             </div>

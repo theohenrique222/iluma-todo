@@ -253,6 +253,12 @@ function startTask(task: Task, event: Event) {
     );
 }
 
+function stripHtml(html: string): string {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+}
+
 function formatDate(date: string): string {
     const months: Record<number, string> = {
         1: 'jan',
@@ -537,7 +543,7 @@ function forceDeleteTask(task: Task, event: Event) {
                                     v-if="task.description"
                                     class="line-clamp-2 text-xs text-muted-foreground"
                                 >
-                                    {{ task.description }}
+                                    {{ stripHtml(task.description) }}
                                 </p>
 
                                 <div class="flex items-center gap-2">
@@ -655,7 +661,7 @@ function forceDeleteTask(task: Task, event: Event) {
                                     v-if="task.description"
                                     class="line-clamp-2 text-xs text-muted-foreground"
                                 >
-                                    {{ task.description }}
+                                    {{ stripHtml(task.description) }}
                                 </p>
 
                                 <div class="flex items-center gap-2">
@@ -767,7 +773,7 @@ function forceDeleteTask(task: Task, event: Event) {
                             v-if="task.description"
                             class="line-clamp-2 text-xs text-muted-foreground"
                         >
-                            {{ task.description }}
+                            {{ stripHtml(task.description) }}
                         </p>
 
                         <div class="flex items-center gap-2">

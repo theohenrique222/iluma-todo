@@ -4,6 +4,7 @@ import { Plus } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import InputError from '@/components/InputError.vue';
 import ProjectSelector from '@/components/projects/ProjectSelector.vue';
+import RichTextEditor from '@/components/RichTextEditor.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { Project } from '@/types';
@@ -18,6 +19,7 @@ const emits = defineEmits<{
     submit: [
         formData: {
             title: string;
+            description: string | null;
             due_date: string;
             priority: string;
             project_id: string;
@@ -27,6 +29,7 @@ const emits = defineEmits<{
 }>();
 
 const selectedProjectId = ref<string>(props.defaultProjectId ?? '');
+const description = ref<string | null>(null);
 
 watch(
     () => props.defaultProjectId,
@@ -53,8 +56,15 @@ function onProjectCreated(): void {
         @success="
             emits(
                 'submit',
-                data as {
+                {
+                    title: data.title,
+                    description: description.value,
+                    due_date: data.due_date,
+                    priority: data.priority,
+                    project_id: data.project_id,
+                } as {
                     title: string;
+                    description: string | null;
                     due_date: string;
                     priority: string;
                     project_id: string;
@@ -81,12 +91,11 @@ function onProjectCreated(): void {
                 <label class="text-sm leading-none font-medium text-foreground">
                     Descrição
                 </label>
-                <textarea
-                    name="description"
+                <RichTextEditor
+                    v-model="description"
                     placeholder="Adicione detalhes sobre a tarefa (opcional)"
-                    rows="3"
-                    class="flex w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                ></textarea>
+                />
+                <input type="hidden" name="description" :value="description" />
                 <InputError :message="errors.description" />
             </div>
 
