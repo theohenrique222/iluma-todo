@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form, router, useForm } from '@inertiajs/vue3';
 import { Plus } from 'lucide-vue-next';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import InputError from '@/components/InputError.vue';
 import ProjectColorDot from '@/components/projects/ProjectColorDot.vue';
 import { Button } from '@/components/ui/button';
@@ -56,6 +56,33 @@ watch(
     },
 );
 
+const selectedProject = computed(
+    () =>
+        props.projects?.find((p) => String(p.id) === selectedProjectId.value) ??
+        null,
+);
+
+const projectSelectClass = computed(() => {
+    const base =
+        'flex h-10 w-full cursor-pointer rounded-full border px-3 py-2 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50';
+
+    if (selectedProject.value) {
+        const styles = getProjectColorStyles(selectedProject.value.color);
+
+        return [
+            base,
+            styles.trigger
+                .replace(
+                    'focus-visible:ring-ring/20',
+                    'focus-visible:ring-ring',
+                )
+                .replace('data-[state=open]:', ''),
+        ];
+    }
+
+    return [base, 'border-input bg-background focus-visible:ring-ring'];
+});
+
 const projectForm = useForm({
     name: '',
     color: DEFAULT_PROJECT_COLOR as ProjectColorKey,
@@ -79,7 +106,9 @@ function createProject(): void {
                 preserveScroll: true,
                 preserveState: true,
                 onSuccess: (page) => {
-                    const latestProject = [...((page.props.projects as Project[]) ?? [])]
+                    const latestProject = [
+                        ...((page.props.projects as Project[]) ?? []),
+                    ]
                         .reverse()
                         .find((project) => project.name === createdProjectName);
 
@@ -136,14 +165,16 @@ function createProject(): void {
                     name="description"
                     placeholder="Adicione detalhes sobre a tarefa (opcional)"
                     rows="3"
-                    class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                    class="flex w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 ></textarea>
                 <InputError :message="errors.description" />
             </div>
 
             <div class="space-y-2">
                 <div class="flex items-center justify-between gap-2">
-                    <label class="text-sm leading-none font-medium text-foreground">
+                    <label
+                        class="text-sm leading-none font-medium text-foreground"
+                    >
                         Projeto
                     </label>
                     <Button
@@ -160,7 +191,7 @@ function createProject(): void {
                 <select
                     v-model="selectedProjectId"
                     name="project_id"
-                    class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                    :class="projectSelectClass"
                 >
                     <option value="">Sem projeto</option>
                     <option
@@ -252,10 +283,16 @@ function createProject(): void {
                         <SelectTrigger class="w-full">
                             <div class="flex items-center gap-2">
                                 <ProjectColorDot
-                                    :dot-class="getProjectColorStyles(projectForm.color).dot"
+                                    :dot-class="
+                                        getProjectColorStyles(projectForm.color)
+                                            .dot
+                                    "
                                 />
                                 <SelectValue
-                                    :placeholder="getProjectColorStyles(projectForm.color).label"
+                                    :placeholder="
+                                        getProjectColorStyles(projectForm.color)
+                                            .label
+                                    "
                                 />
                             </div>
                         </SelectTrigger>
