@@ -1,31 +1,11 @@
 <script setup lang="ts">
-import { Form, router, useForm } from '@inertiajs/vue3';
-import { Folder, Plus } from 'lucide-vue-next';
-import { computed, ref, watch } from 'vue';
+import { Form, router } from '@inertiajs/vue3';
+import { Plus } from 'lucide-vue-next';
+import { ref, watch } from 'vue';
 import InputError from '@/components/InputError.vue';
-import ProjectColorDot from '@/components/projects/ProjectColorDot.vue';
+import ProjectSelector from '@/components/projects/ProjectSelector.vue';
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import {
-    DEFAULT_PROJECT_COLOR,
-    getProjectColorStyles,
-    PROJECT_COLOR_OPTIONS,
-} from '@/lib/project-colors';
-import type { ProjectColorKey } from '@/lib/project-colors';
 import type { Project } from '@/types';
 
 const props = defineProps<{
@@ -46,7 +26,6 @@ const emits = defineEmits<{
     cancel: [];
 }>();
 
-const projectDialogOpen = ref(false);
 const selectedProjectId = ref<string>(props.defaultProjectId ?? '');
 
 watch(
@@ -56,88 +35,11 @@ watch(
     },
 );
 
-const selectedProject = computed(
-    () =>
-        props.projects?.find((p) => String(p.id) === selectedProjectId.value) ??
-        null,
-);
-
-const projectSelectWrapperClass = computed(() => {
-    const base =
-        'relative flex h-10 w-full items-center rounded-full border shadow-sm transition-colors';
-
-    if (selectedProject.value) {
-        const styles = getProjectColorStyles(selectedProject.value.color);
-
-        return [
-            base,
-            styles.trigger
-                .replace(
-                    'focus-visible:ring-ring/20',
-                    'focus-visible:ring-ring',
-                )
-                .replace('data-[state=open]:', ''),
-        ];
-    }
-
-    return [base, 'border-input bg-background'];
-});
-
-const projectSelectClass = computed(() => {
-    const base =
-        'h-full w-full cursor-pointer appearance-none rounded-full border-0 bg-transparent py-2 pl-9 pr-8 text-sm shadow-none focus:outline-none focus:ring-0';
-
-    if (selectedProject.value) {
-        const styles = getProjectColorStyles(selectedProject.value.color);
-
-        return [
-            base,
-            styles.trigger.includes('text-')
-                ? styles.trigger.match(/text-\S+/)?.[0]
-                : 'text-foreground',
-        ];
-    }
-
-    return [base, 'text-foreground'];
-});
-
-const projectForm = useForm({
-    name: '',
-    color: DEFAULT_PROJECT_COLOR as ProjectColorKey,
-});
-
-function closeProjectDialog(): void {
-    projectDialogOpen.value = false;
-    projectForm.reset();
-    projectForm.color = DEFAULT_PROJECT_COLOR;
-}
-
-function createProject(): void {
-    const createdProjectName = projectForm.name.trim();
-
-    projectForm.post('/projects', {
+function onProjectCreated(): void {
+    router.reload({
+        only: ['projects'],
         preserveScroll: true,
         preserveState: true,
-        onSuccess: () => {
-            router.reload({
-                only: ['projects'],
-                preserveScroll: true,
-                preserveState: true,
-                onSuccess: (page) => {
-                    const latestProject = [
-                        ...((page.props.projects as Project[]) ?? []),
-                    ]
-                        .reverse()
-                        .find((project) => project.name === createdProjectName);
-
-                    if (latestProject) {
-                        selectedProjectId.value = String(latestProject.id);
-                    }
-                },
-            });
-
-            closeProjectDialog();
-        },
     });
 }
 </script>
@@ -189,49 +91,17 @@ function createProject(): void {
             </div>
 
             <div class="space-y-2">
-                <div class="flex items-center justify-between gap-2">
-                    <label
-                        class="text-sm leading-none font-medium text-foreground"
-                    >
-                        Projeto
-                    </label>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        class="h-7 px-2 text-blue-700 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                        @click="projectDialogOpen = true"
-                    >
-                        <Plus class="size-3.5" />
-                        Criar projeto
-                    </Button>
-                </div>
-                <div :class="projectSelectWrapperClass">
-                    <Folder
-                        v-if="!selectedProject"
-                        class="absolute left-3 size-4 shrink-0 text-muted-foreground"
-                    />
-                    <ProjectColorDot
-                        v-else
-                        :dot-class="
-                            getProjectColorStyles(selectedProject.color).dot
-                        "
-                        class="absolute left-3"
-                    />
-                    <select
+                <label class="text-sm leading-none font-medium text-foreground">
+                    Projeto
+                </label>
+                <div>
+                    <ProjectSelector
                         v-model="selectedProjectId"
-                        name="project_id"
-                        :class="projectSelectClass"
-                    >
-                        <option value="">Sem projeto</option>
-                        <option
-                            v-for="project in props.projects ?? []"
-                            :key="project.id"
-                            :value="String(project.id)"
-                        >
-                            {{ project.name }}
-                        </option>
-                    </select>
+                        :projects="props.projects ?? []"
+                        placeholder="Sem projeto"
+                        @project-created="onProjectCreated"
+                    />
+                    <input type="hidden" name="project_id" :value="selectedProjectId" />
                 </div>
                 <InputError :message="errors.project_id" />
             </div>
@@ -286,75 +156,4 @@ function createProject(): void {
             </div>
         </div>
     </Form>
-
-    <Dialog v-model:open="projectDialogOpen">
-        <DialogContent class="sm:max-w-md">
-            <DialogHeader>
-                <DialogTitle>Novo Projeto</DialogTitle>
-                <DialogDescription>
-                    Crie um novo projeto para agrupar suas tarefas.
-                </DialogDescription>
-            </DialogHeader>
-
-            <form class="space-y-4" @submit.prevent="createProject">
-                <div class="space-y-2">
-                    <label class="text-sm font-medium">Nome do Projeto</label>
-                    <Input
-                        v-model="projectForm.name"
-                        type="text"
-                        placeholder="Ex: Marketing Digital"
-                        required
-                    />
-                    <InputError :message="projectForm.errors.name" />
-                </div>
-
-                <div class="space-y-2">
-                    <label class="text-sm font-medium">Cor</label>
-                    <Select v-model="projectForm.color">
-                        <SelectTrigger class="w-full">
-                            <div class="flex items-center gap-2">
-                                <ProjectColorDot
-                                    :dot-class="
-                                        getProjectColorStyles(projectForm.color)
-                                            .dot
-                                    "
-                                />
-                                <SelectValue
-                                    :placeholder="
-                                        getProjectColorStyles(projectForm.color)
-                                            .label
-                                    "
-                                />
-                            </div>
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem
-                                v-for="option in PROJECT_COLOR_OPTIONS"
-                                :key="option.key"
-                                :value="option.key"
-                            >
-                                <div class="flex items-center gap-2">
-                                    <ProjectColorDot :dot-class="option.dot" />
-                                    <span>{{ option.label }}</span>
-                                </div>
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div class="flex justify-end gap-2">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        @click="closeProjectDialog"
-                    >
-                        Cancelar
-                    </Button>
-                    <Button type="submit" :disabled="projectForm.processing">
-                        Criar Projeto
-                    </Button>
-                </div>
-            </form>
-        </DialogContent>
-    </Dialog>
 </template>
