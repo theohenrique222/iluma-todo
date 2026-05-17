@@ -253,12 +253,6 @@ function startTask(task: Task, event: Event) {
     );
 }
 
-function stripHtml(html: string): string {
-    const tmp = document.createElement('div');
-    tmp.innerHTML = html;
-    return tmp.textContent || tmp.innerText || '';
-}
-
 function formatDate(date: string): string {
     const months: Record<number, string> = {
         1: 'jan',
@@ -539,13 +533,6 @@ function forceDeleteTask(task: Task, event: Event) {
                                     {{ task.title }}
                                 </span>
 
-                                <p
-                                    v-if="task.description"
-                                    class="line-clamp-2 text-xs text-muted-foreground"
-                                >
-                                    {{ stripHtml(task.description) }}
-                                </p>
-
                                 <div class="flex items-center gap-2">
                                     <span
                                         v-if="task.project"
@@ -657,13 +644,6 @@ function forceDeleteTask(task: Task, event: Event) {
                                     {{ task.title }}
                                 </span>
 
-                                <p
-                                    v-if="task.description"
-                                    class="line-clamp-2 text-xs text-muted-foreground"
-                                >
-                                    {{ stripHtml(task.description) }}
-                                </p>
-
                                 <div class="flex items-center gap-2">
                                     <span
                                         v-if="task.project"
@@ -768,13 +748,6 @@ function forceDeleteTask(task: Task, event: Event) {
                         >
                             {{ task.title }}
                         </span>
-
-                        <p
-                            v-if="task.description"
-                            class="line-clamp-2 text-xs text-muted-foreground"
-                        >
-                            {{ stripHtml(task.description) }}
-                        </p>
 
                         <div class="flex items-center gap-2">
                             <span
